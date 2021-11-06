@@ -1,0 +1,44 @@
+[project]
+name = "LLVM/Clang"
+version = "12.x"
+git_repo_url = "https://github.com/hdoc/llvm-project/blob/release/12.x/"
+
+[paths]
+compile_commands = "build/compile_commands.json"
+output_dir = "hdoc-output"
+
+[ignore]
+paths = [
+      "/llvm/benchmarks",
+      "/llvm/bindings",
+      "/llvm/cmake",
+      "/llvm/configure",
+      "/llvm/docs",
+      "/llvm/examples",
+      "/llvm/projects",
+      "/llvm/resources",
+      "/llvm/runtimes",
+      "/llvm/test",
+      "/llvm/tools",
+      "/llvm/unittests",
+      "/llvm/utils",
+      "/clang/bindings",
+      "/clang/cmake",
+      "/clang/docs",
+      "/clang/examples",
+      "/clang/INPUTS",
+      "/clang/runtime",
+      "/clang/test",
+      "/clang/tools",
+      "/clang/unittests",
+      "/clang/utils",
+      "/clang/www",
+]
+
+[pages]
+homepage = "README.md"
+paths = [
+      "hdoc-docs/GettingStarted.md",
+      "hdoc-docs/BuildingLLVM.md",
+      "hdoc-docs/CodingStandards.md",
+]
