@@ -1,7 +1,7 @@
 [project]
 name = "LLVM/Clang"
-version = "12.x"
-git_repo_url = "https://github.com/hdoc/llvm-project/blob/release/12.x/"
+version = "13.x"
+git_repo_url = "https://github.com/hdoc/llvm-project/blob/release/13.x/"
 
 [paths]
 compile_commands = "build/compile_commands.json"
@@ -38,7 +38,7 @@ paths = [
 [pages]
 homepage = "README.md"
 paths = [
-      "hdoc-docs/GettingStarted.md",
-      "hdoc-docs/BuildingLLVM.md",
-      "hdoc-docs/CodingStandards.md",
+      "hdoc-docs/Getting Started.md",
+      "hdoc-docs/Building LLVM.md",
+      "hdoc-docs/Coding Standards.md",
 ]

@@ -82,7 +82,7 @@ usually be used instead of `std::vector`.
 We explicitly avoid some standard facilities, like the I/O streams, and
 instead use LLVM\'s streams library ([raw_ostream](#raw_ostream)). More
 detailed information on these subjects is available in the
-`ProgrammersManual`{.interpreted-text role="doc"}.
+Programmers Manual.
 
 For more information about LLVM\'s data structures and the tradeoffs
 they make, please consult \[that section of the programmer\'s
@@ -111,7 +111,7 @@ punctuation, etc. Aim to describe what the code is trying to do and why,
 not *how* it does it at a micro level. Here are a few important things
 to document:
 
-##### File Headers {#header file comment}
+##### File Headers
 
 Every source file should have a header on it that describes the basic
 purpose of the file. The standard header looks like this:
@@ -137,10 +137,7 @@ string on the first line is there to tell Emacs that the source file is
 a C++ file, not a C file (Emacs assumes `.h` files are C files by
 default).
 
-::: note
-::: title
-Note
-:::
+Note:
 
 This tag is not necessary in `.cpp` files. The name of the file is also
 on the first line, along with a very short description of the purpose of
@@ -361,19 +358,15 @@ include guards if working on a header file), the [minimal list of
 #includes](#minimal list of #includes) required by the file should be
 listed. We prefer these `#include`s to be listed in this order:
 
-::: {#Main Module Header}
-::: {#Local/Private Headers}
 1.  Main Module Header
 2.  Local/Private Headers
 3.  LLVM project/subproject headers (`clang/...`, `lldb/...`,
     `llvm/...`, etc)
 4.  System `#include`s
-:::
-:::
 
 and each category should be sorted lexicographically by the full path.
 
-The [Main Module Header](#Main Module Header) file applies to `.cpp`
+The Main Module Header file applies to `.cpp`
 files which implement an interface defined by a `.h` file. This
 `#include` should always be included **first** regardless of where it
 lives on the file system. By including a header file first in the `.cpp`
@@ -393,7 +386,7 @@ file or some earlier header file. clang should similarly include its own
 headers before including llvm headers. This rule applies to all LLVM
 subprojects.
 
-#### Source Code Width {#fit into 80 columns}
+#### Source Code Width
 
 Write your code to fit within 80 columns.
 
@@ -533,19 +526,18 @@ for example, `dynamic_cast<>`).
 
 That said, LLVM does make extensive use of a hand-rolled form of RTTI
 that use templates like
-`isa\<>, cast\<>, and dyn_cast\<> <isa>`{.interpreted-text role="ref"}.
+`isa<>`, `cast<>`, and `dyn_cast<>` `<isa>`.
 This form of RTTI is opt-in and can be
-`added to any class <HowToSetUpLLVMStyleRTTI>`{.interpreted-text
-role="doc"}.
+added to any class.
 
-#### Do not use Static Constructors {#static constructor}
+#### Do not use Static Constructors
 
 Static constructors and destructors (e.g., global variables whose types
 have a constructor or destructor) should not be added to the code base,
 and should be removed wherever possible.
 
-Globals in different source files are initialized in [arbitrary order
-\<https://yosefk.com/c++fqa/ctors.html#fqa-10.12>]{.title-ref}, making
+Globals in different source files are initialized in [arbitrary order]
+(https://yosefk.com/c++fqa/ctors.html#fqa-10.12), making
 the code more difficult to reason about.
 
 Static constructors have negative impact on launch time of programs that
@@ -744,7 +736,7 @@ A\", in both cases the explicit dependencies come before their use. But
 in the first case, B could still link successfully if it implicitly
 depended on C, or the opposite in the second case)
 
-#### `#include` as Little as Possible {#minimal list of #includes}
+#### `#include` as Little as Possible
 
 `#include` hurts compile time performance. Don\'t do it unless you have
 to, especially in header files.
@@ -779,14 +771,10 @@ in the same directory as the source files, and include it locally. This
 ensures that your private interface remains private and undisturbed by
 outsiders.
 
-::: note
-::: title
-Note
-:::
+Note:
 
 It\'s okay to put extra implementation methods in a public class itself.
 Just make them private (or protected) and all is well.
-:::
 
 #### Use Namespace Qualifiers to Implement Previously Declared Functions
 
@@ -833,7 +821,7 @@ Class method implementations must already name the class and new
 overloads cannot be introduced out of line, so this recommendation does
 not apply to them.
 
-#### Use Early Exits and `continue` to Simplify Code {#early exits}
+#### Use Early Exits and `continue` to Simplify Code
 
 When reading code, keep in mind how much state and how many previous
 decisions have to be remembered by the reader to understand a block of
@@ -1190,7 +1178,7 @@ testable predicate (as opposed to `assert(false)`).
 
 If the error condition can be triggered by user input then the
 recoverable error mechanism described in
-`ProgrammersManual`{.interpreted-text role="doc"} should be used
+Programmers Manual should be used
 instead. In cases where this is not practical, `report_fatal_error` may
 be used.
 
@@ -1357,16 +1345,12 @@ not problematic in this regard \-\-- just `<iostream>`. However,
 `raw_ostream` provides various APIs that are better performing for
 almost every use than `std::ostream` style APIs.
 
-::: note
-::: title
-Note
-:::
+Note:
 
 New code should always use [raw_ostream](#raw_ostream) for writing, or
 the `llvm::MemoryBuffer` API for reading files.
-:::
 
-#### Use `raw_ostream` {#raw_ostream}
+#### Use `raw_ostream`
 
 LLVM includes a lightweight, simple, and efficient stream implementation
 in `llvm/Support/raw_ostream.h`, which provides all of the common
@@ -1495,7 +1479,7 @@ header file is rarely a source of confusion. But namespaces both
 anonymous and named in source files that are being closed half way
 through the file probably could use clarification.
 
-#### Anonymous Namespaces {#static}
+#### Anonymous Namespaces
 
 After talking about namespaces in general, you may be wondering about
 anonymous namespaces in particular. Anonymous namespaces are a great
