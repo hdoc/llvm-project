@@ -32,6 +32,11 @@ source:
     -   `git clone https://github.com/llvm/llvm-project.git`
     -   Or, on windows,
         `git clone --config core.autocrlf=false https://github.com/llvm/llvm-project.git`
+    -   To save storage and speed-up the checkout time, you may want to
+        do a [shallow
+        clone](https://git-scm.com/docs/git-clone#Documentation/git-clone.txt---depthltdepthgt).
+        For example, to get the latest revision of the LLVM project, use
+        `git clone --depth 1 https://github.com/llvm/llvm-project.git`
 2.  Configure and build LLVM and Clang:
     -   `cd llvm-project`
 
@@ -58,7 +63,7 @@ source:
             list of the LLVM subprojects you\'d like to additionally
             build. Can include any of: clang, clang-tools-extra, libcxx,
             libcxxabi, libunwind, lldb, compiler-rt, lld, polly, or
-            debuginfo-tests.
+            cross-project-tests.
 
             For example, to build LLVM, Clang, libcxx, and libcxxabi,
             use `-DLLVM_ENABLE_PROJECTS="clang;libcxx;libcxxabi"`.
@@ -109,14 +114,32 @@ hardware and software you will need.
 ### Hardware
 
 LLVM is known to work on the following host platforms:
- - Linux: x86, amd64, ARM, Mips, PowerPC, SystemZ
- - Solaris: V9 (Ultrasparc)
- - FreeBSD: x86, amd64
- - NetBSD: x86, amd64
- - macOS: x86, PowerPC
- - Cygwin/Win32: x86
- - Windows: x86
- - Windows x64: x86-64
+
+| OS           | Arch            | Compilers     |
+|--------------|-----------------|---------------|
+| Linux        | x86¹            | GCC, Clang    |
+| Linux        | amd64           | GCC, Clang    |
+| Linux        | ARM             | GCC, Clang    |
+| Linux        | Mips            | GCC, Clang    |
+| Linux        | PowerPC         | GCC, Clang    |
+| Linux        | SystemZ         | GCC, Clang    |
+| Solaris      | V9 (Ultrasparc) | GCC           |
+| FreeBSD      | x86¹            | GCC, Clang    |
+| FreeBSD      | amd64           | GCC, Clang    |
+| NetBSD       | x86¹            | GCC, Clang    |
+| NetBSD       | amd64           | GCC, Clang    |
+| macOS²       | PowerPC         | GCC           |
+| macOS        | x86             | GCC, Clang    |
+| Cygwin/Win32 | x86¹ ³          | GCC           |
+| Windows      | x86¹            | Visual Studio |
+| Windows x64  | x86-64          | Visual Studio |
+
+Note:
+
+1.  Code generation supported for Pentium processors and up
+2.  Code generation supported for 32-bit ABI only
+3.  To use LLVM modules on Win32-based system, you may configure LLVM
+    with `-DBUILD_SHARED_LIBS=On`.
 
 Note that Debug builds require a lot of time and disk space. An
 LLVM-only build will need about 1-3 GB of space. A full build of LLVM
@@ -137,13 +160,30 @@ native code may not work on your platform.
 ### Software
 
 Compiling LLVM requires that you have several software packages
-installed. The table below lists those required packages.
+installed. The table below lists those required packages. The Package
+column is the usual name for the software package that LLVM depends on.
+The Version column provides \"known to work\" versions of the package.
+The Notes column describes how LLVM uses the package and provides other
+details.
 
-- [CMake](http://cmake.org/) \>=3.13.4
-- [GCC](http://gcc.gnu.org/) \>=5.1.0
-- [python](http://www.python.org/) \>=3.6
-- [zlib](http://zlib.net) \>=1.2.3.4
-- [GNU Make](http://savannah.gnu.org/projects/make) 3.79, 3.79.1
+ | Package                                           | Version      | Notes                        |
+ |---------------------------------------------------|--------------|------------------------------|
+ | [CMake](http://cmake.org/)                        | \>=3.13.4    | Makefile/workspace generator |
+ | [GCC](http://gcc.gnu.org/)                        | \>=5.1.0     | C/C++ compiler¹              |
+ | [python](http://www.python.org/)                  | \>=3.6       | Automated test suite²        |
+ | [zlib](http://zlib.net)                           | \>=1.2.3.4   | Compression library³         |
+ | [GNU Make](http://savannah.gnu.org/projects/make) | 3.79, 3.79.1 | Makefile/build processor⁴    |
+
+Note:
+
+1.  Only the C and C++ languages are needed so there\'s no need to build
+    the other languages for LLVM\'s purposes. See [below]{.title-ref}
+    for specific version info.
+2.  Only needed if you want to run the automated test suite in the
+    `llvm/test` directory.
+3.  Optional, adds compression / uncompression capabilities to selected
+    LLVM tools.
+4.  Optional, you can use any other build tool supported by CMake.
 
 Additionally, your compilation host is expected to have the usual
 plethora of Unix utilities. Specifically:
@@ -367,9 +407,15 @@ The files are as follows, with *x.y* marking the version number:
 
 > Source release for the Clang frontend.
 
-### Checkout LLVM from Git {#checkout}
+### Checkout LLVM from Git
 
 You can also checkout the source code for LLVM from Git.
+
+Note:
+
+Passing `--config core.autocrlf=false` should not be required in the
+future after we adjust the .gitattribute settings correctly, but is
+required for Windows users at the time of this writing.
 
 Simply run:
 
@@ -392,8 +438,8 @@ the projects together.
 
 If you want to get a specific release (as opposed to the most recent
 revision), you can check out a tag after cloning the repository. E.g.,
-[git checkout llvmorg-6.0.1]{.title-ref} inside the `llvm-project`
-directory created by the above command. Use [git tag -l]{.title-ref} to
+`git checkout llvmorg-6.0.1` inside the `llvm-project`
+directory created by the above command. Use `git tag -l` to
 list all of them.
 
 #### Sending patches
@@ -439,6 +485,13 @@ likely want to run
 
 in order to update the last commit with all pending changes.
 
+Note
+
+If you don\'t already have `clang-format` or `git clang-format`
+installed on your system, the `clang-format` binary will be built
+alongside clang, and the git integration can be run from
+`clang/tools/clang-format/git-clang-format`.
+
 #### For developers to commit changes from Git
 
 Once a patch is reviewed, you should rebase it, re-test locally, and
@@ -448,7 +501,7 @@ committing a change for Phabricator based commits or obtaining commit
 access for commit access.
 
 Here is an example workflow using git. This workflow assumes you have an
-accepted commit on the branch named [branch-with-change]{.title-ref}.
+accepted commit on the branch named `branch-with-change`.
 
 ``` console
 # Go to the branch with your accepted commit.
@@ -495,32 +548,6 @@ add some details before it as to why the commit is being reverted. A
 brief explanation and/or links to bots that demonstrate the problem are
 sufficient.
 
-#### Checkout via SVN (deprecated)
-
-The SVN repository is no longer updated, but it is still available for
-now. If you need to check the code out of SVN rather than git for some
-reason, you can do it like so:
-
--   `cd where-you-want-llvm-to-live`
--   Read-Only:
-    `svn co https://llvm.org/svn/llvm-project/llvm/trunk llvm`
--   Read-Write:
-    `svn co https://user@llvm.org/svn/llvm-project/llvm/trunk llvm`
-
-This will create an \'`llvm`\' directory in the current directory and
-fully populate it with the LLVM source code, Makefiles, test
-directories, and local copies of documentation files.
-
-If you want to get a specific release (as opposed to the most recent
-revision), you can check it out from the \'`tags`\' directory (instead
-of \'`trunk`\'). The following releases are located in the following
-subdirectories of the \'`tags`\' directory:
-
--   Release 3.5.0 and later: **RELEASE_350/final** and so on
--   Release 2.9 through 3.4: **RELEASE_29/final** and so on
--   Release 1.1 through 2.8: **RELEASE_11** and so on
--   Release 1.0: **RELEASE_1**
-
 ### Local LLVM Configuration
 
 Once checked out repository, the LLVM suite source code must be
@@ -533,61 +560,19 @@ Variables are passed to `cmake` on the command line using the format
 `-D<variable name>=<value>`. The following variables are some common
 options used by people developing LLVM.
 
-`CMAKE_C_COMPILER`
-
-Tells `cmake` which C compiler to use. By default, this will be /usr/bin/cc.
-
-`CMAKE_CXX_COMPILER`
-
-Tells `cmake` which C++ compiler to use. By default, this will be /usr/bin/c++.
-
-`CMAKE_BUILD_TYPE`
-
-Tells `cmake` what type of build you are trying to generate files for. Valid options are Debug,
-Release, RelWithDebInfo, and MinSizeRel. Default is Debug.
-
-`CMAKE_INSTALL_PREFIX`
-
-Specifies the install directory to target when running the install action of the build files.
-
-`PYTHON_EXECUTABLE`
-
-Forces CMake to use a specific Python version by passing a path to a Python interpreter. By
-default the Python version of the interpreter in your PATH is used.
-
-`LLVM_TARGETS_TO_BUILD`
-
-A semicolon delimited list controlling which targets will be built and linked into llvm. The
-default list is defined as `LLVM_ALL_TARGETS`, and can be set to include out-of-tree targets. The
-default value includes:
-`AArch64, AMDGPU, ARM, BPF, Hexagon, Mips, MSP430, NVPTX, PowerPC, Sparc, SystemZ, X86, XCore`.
-
-`LLVM_ENABLE_DOXYGEN`
-
-Build doxygen-based documentation from the source code This is disabled by default because it is
-slow and generates a lot of output.
-
-`LLVM_ENABLE_PROJECTS`
-
-A semicolon-delimited list selecting which of the other LLVM subprojects to additionally build.
-(Only effective when using a side-by-side project layout e.g. via git). The default list is
-empty. Can include: clang, libcxx, libcxxabi, libunwind, lldb, compiler-rt, lld, polly, or
-debuginfo-tests.
-
-`LLVM_ENABLE_SPHINX`
-
-Build sphinx-based documentation from the source code. This is disabled by default because it is
-slow and generates a lot of output. Sphinx version 1.5 or later recommended.
-
-`LLVM_BUILD_LLVM_DYLIB`
-
-Generate libLLVM.so. This library contains a default set of LLVM components that can be
-overridden with `LLVM_DYLIB_COMPONENTS`. The default contains most of LLVM and is defined in
-`tools/llvm-shlib/CMakelists.txt`. This option is not available on Windows.
-
-LLVM_OPTIMIZED_TABLEGEN
-Builds a release tablegen that gets used during the LLVM build. This can dramatically speed up
-debug builds.
+| Variable                | Purpose                                                                                                                                                                                                                                                                                                                                                 |
+|-------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| CMAKE_C\_COMPILER       | Tells `cmake` which C compiler to use. By default, this will be /usr/bin/cc.                                                                                                                                                                                                                                                                            |
+| CMAKE_CXX_COMPILER      | Tells `cmake` which C++ compiler to use. By default, this will be /usr/bin/c++.                                                                                                                                                                                                                                                                         |
+| CMAKE_BUILD_TYPE        | Tells `cmake` what type of build you are trying to generate files for. Valid options are Debug, Release, RelWithDebInfo, and MinSizeRel. Default is Debug.                                                                                                                                                                                              |
+| CMAKE_INSTALL_PREFIX    | Specifies the install directory to target when running the install action of the build files.                                                                                                                                                                                                                                                           |
+| PYTHON_EXECUTABLE       | Forces CMake to use a specific Python version by passing a path to a Python interpreter. By default the Python version of the    interpreter in your PATH is used.                                                                                                                                                                                      |
+| LLVM_TARGETS_TO_BUILD   | A semicolon delimited list controlling which targets will be built and linked into llvm. The default list is defined as `LLVM_ALL_TARGETS`, and can be set to include out-of-tree targets. The default value includes:  `AArch64, AMDGPU, ARM, AVR, BPF, Hexagon, Lanai, Mips, MSP430, NVPTX, PowerPC, RISCV, Sparc, SystemZ, WebAssembly, X86, XCore`. |
+| LLVM_ENABLE_DOXYGEN     | Build doxygen-based documentation from the source code This is disabled by default because it is slow and generates a lot of output.                                                                                                                                                                                                                    |
+| LLVM_ENABLE_PROJECTS    | A semicolon-delimited list selecting which of the other LLVM subprojects to additionally build. (Only effective when using a  side-by-side project layout e.g. via git). The default list is empty. Can include: clang, libcxx, libcxxabi, libunwind, lldb,  compiler-rt, lld, polly, or debuginfo-tests.                                               |
+| LLVM_ENABLE_SPHINX      | Build sphinx-based documentation from the source code. This is disabled by default because it is slow and generates a lot of   output. Sphinx version 1.5 or later recommended.                                                                                                                                                                         |
+| LLVM_BUILD_LLVM_DYLIB   | Generate libLLVM.so. This library contains a default set of LLVM components that can be overridden with `LLVM_DYLIB_COMPONENTS`. The default contains most of LLVM and is defined in `tools/llvm-shlib/CMakelists.txt`. This option is not available on Windows.                                                                                        |
+| LLVM_OPTIMIZED_TABLEGEN | Builds a release tablegen that gets used during the LLVM build. This can dramatically speed up debug builds.                                                                                                                                                                                                                                            |
 
 To configure LLVM, follow these steps:
 
@@ -734,11 +719,11 @@ files for each source.
 
 For example:
 
-``` console
-% cd llvm_build_dir
-% find lib/Support/ -name APFloat*
-lib/Support/CMakeFiles/LLVMSupport.dir/APFloat.cpp.o
-```
+ ``` console
+ % cd llvm_build_dir
+ % find lib/Support/ -name APFloat*
+ lib/Support/CMakeFiles/LLVMSupport.dir/APFloat.cpp.o
+ ```
 
 ### Optional Configuration Items
 
@@ -769,9 +754,37 @@ One useful source of information about the LLVM source base is the LLVM
 <https://llvm.org/doxygen/>. The following is a brief introduction to
 code layout:
 
+### `llvm/cmake`
+
+Generates system build files.
+
+`llvm/cmake/modules`
+
+   Build configuration for llvm user defined options. Checks compiler
+   version and linker flags.
+
+`llvm/cmake/platforms`
+
+   Toolchain configuration for Android NDK, iOS systems and non-Windows
+   hosts to target MSVC.
+
 ### `llvm/examples`
 
-Simple examples using the LLVM IR and JIT.
+-   Some simple examples showing how to use LLVM as a compiler for a
+    custom language - including lowering, optimization, and code
+    generation.
+-   Kaleidoscope Tutorial: Kaleidoscope language tutorial run through
+    the implementation of a nice little compiler for a non-trivial
+    language including a hand-written lexer, parser, AST, as well as
+    code generation support using LLVM- both static (ahead of time) and
+    various approaches to Just In Time (JIT) compilation. [Kaleidoscope
+    Tutorial for complete
+    beginner](https://llvm.org/docs/tutorial/MyFirstLanguageFrontend/index.html).
+-   BuildingAJIT: Examples of the [BuildingAJIT
+    tutorial](https://llvm.org/docs/tutorial/BuildingAJIT1.html) that
+    shows how LLVM's ORC JIT APIs interact with other parts of LLVM. It
+    also, teaches how to recombine them to build a custom JIT that is
+    suited to your use-case.
 
 ### `llvm/include`
 
@@ -838,7 +851,8 @@ easy to share code among the [tools](#tools).
 
 `llvm/lib/MC/`
 
-> (FIXME: T.B.D.) \....?
+> The libraries represent and process code at machine code level.
+> Handles assembly and object-file emission.
 
 `llvm/lib/ExecutionEngine/`
 
@@ -849,6 +863,13 @@ easy to share code among the [tools](#tools).
 
 > Source code that corresponding to the header files in
 > `llvm/include/ADT/` and `llvm/include/Support/`.
+
+### `llvm/bindings`
+
+Contains bindings for the LLVM compiler infrastructure to allow programs
+written in languages other than C or C++ to take advantage of the LLVM
+infrastructure. LLVM project provides language bindings for Go, OCaml
+and Python.
 
 ### `llvm/projects`
 
@@ -871,7 +892,7 @@ because it contains a large amount of third-party code under a variety
 of licenses. For details see the
 `Testing Guide <TestingGuide>` document.
 
-### `llvm/tools` {#tools}
+### `llvm/tools`
 
 Executables built out of the libraries above, which form the main part
 of the user interface. You can always get help for a tool by typing
@@ -1000,10 +1021,7 @@ This section gives an example of using LLVM with the Clang front end.
     % clang hello.c -o hello
     ```
 
-    ::: note
-    ::: title
-    Note
-    :::
+    Note:
 
     Clang works just like GCC by default. The standard -S and -c
     arguments work as usual (producing a native .s or .o file,
