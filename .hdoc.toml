@@ -1,11 +1,10 @@
 [project]
 name = "LLVM/Clang"
-version = "13.x"
-git_repo_url = "https://github.com/hdoc/llvm-project/blob/release/13.x/"
+version = "14.x"
+git_repo_url = "https://github.com/hdoc/llvm-project/blob/release/14.x/"
 
 [paths]
 compile_commands = "build/compile_commands.json"
-output_dir = "hdoc-output"
 
 [ignore]
 paths = [
