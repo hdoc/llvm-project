@@ -1,0 +1,44 @@
+[project]
+name = "LLVM/Clang"
+version = "15.x"
+git_repo_url = "https://github.com/hdoc/llvm-project/"
+git_default_branch = "release/15.x/"
+
+[paths]
+compile_commands = "build/compile_commands.json"
+
+[ignore]
+paths = [
+      "/llvm/benchmarks",
+      "/llvm/bindings",
+      "/llvm/cmake",
+      "/llvm/configure",
+      "/llvm/docs",
+      "/llvm/examples",
+      "/llvm/projects",
+      "/llvm/resources",
+      "/llvm/runtimes",
+      "/llvm/test",
+      "/llvm/tools",
+      "/llvm/unittests",
+      "/llvm/utils",
+      "/clang/bindings",
+      "/clang/cmake",
+      "/clang/docs",
+      "/clang/examples",
+      "/clang/INPUTS",
+      "/clang/runtime",
+      "/clang/test",
+      "/clang/tools",
+      "/clang/unittests",
+      "/clang/utils",
+      "/clang/www",
+]
+
+[pages]
+homepage = "README.md"
+paths = [
+      "hdoc-docs/Getting Started.md",
+      "hdoc-docs/Building LLVM.md",
+      "hdoc-docs/Coding Standards.md",
+]
